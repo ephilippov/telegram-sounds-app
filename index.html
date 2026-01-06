@@ -2,16 +2,126 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Говорилки</title>
+  <title>Звуки животных</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body {
+      margin: 0;
+      background: #0f0f0f;
+      color: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+    }
+
+    .slider {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      transition: transform 0.3s ease;
+    }
+
+    .slide {
+      min-width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    .slide img {
+      width: 70%;
+      max-width: 320px;
+    }
+
+    .label {
+      margin-top: 16px;
+      font-size: 28px;
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 16px;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+  </style>
 </head>
 <body>
-<div id="card" class="card">
-  <img id="image" src="" alt="">
-  <div id="label"></div>
+
+<div id="slider" class="slider">
+
+  <div class="slide" onclick="play('gav')">
+    <img src="images/dog.png">
+    <div class="label">Гав-гав</div>
+  </div>
+
+  <div class="slide" onclick="play('myau')">
+    <img src="images/cat.png">
+    <div class="label">Мяу</div>
+  </div>
+
+  <div class="slide" onclick="play('krya')">
+    <img src="images/duck.png">
+    <div class="label">Кря-кря</div>
+  </div>
+
+  <div class="slide" onclick="play('muu')">
+    <img src="images/cow.png">
+    <div class="label">Му-у</div>
+  </div>
+
 </div>
-<script src="app.js"></script>
+
+<div class="hint">← свайпни →</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  const slider = document.getElementById('slider');
+  let current = 0;
+  const total = slider.children.length;
+
+  let startX = 0;
+
+  document.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  });
+
+  document.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (Math.abs(diff) < 50) return;
+    diff < 0 ? next() : prev();
+  });
+
+  function next() {
+    current = (current + 1) % total;
+    update();
+  }
+
+  function prev() {
+    current = (current - 1 + total) % total;
+    update();
+  }
+
+  function update() {
+    slider.style.transform = `translateX(-${current * 100}vw)`;
+    tg.HapticFeedback?.impactOccurred("light");
+  }
+
+  function play(name) {
+    tg.HapticFeedback?.impactOccurred("medium");
+    new Audio(`sounds/${name}.mp3`).play();
+  }
+</script>
+
 </body>
 </html>
